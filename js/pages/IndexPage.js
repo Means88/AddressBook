@@ -1,25 +1,39 @@
 import React, { PropTypes } from 'react';
-import { StyleSheet, View, Text, ListView, AsyncStorage, Button, TouchableHighlight } from 'react-native';
-import Address from '../models/Address';
+import { observer } from 'mobx-react';
+import {
+  StyleSheet,
+  View,
+  Text,
+  ListView,
+  AsyncStorage,
+  Button,
+  TouchableHighlight,
+  ActivityIndicator
+} from 'react-native';
 import ListItem from '../components/ListItem';
 import DetailPage from './DetailPage';
 import EditModal from '../components/EditModal';
+import AddressStore from '../stores/AddressStore';
 
+
+@observer
 class IndexPage extends React.Component {
 
   constructor(props) {
     super(props);
     this.ds = new ListView.DataSource({
-      rowHasChanged: (r1, r2) => r1 !== r2
+      rowHasChanged: (r1, r2) => {
+        console.log(r1, r2);
+        return r1.name !== r2.name || r1.tel !== r2.tel;
+      }
     });
     this.state = {
-      dataSource: this.ds.cloneWithRows([]),
       modalVisible: false,
     };
   }
 
   componentDidMount() {
-    this.refreshList();
+    this.props.addressStore.fetchAddressList();
   }
 
   onItemClick = (data, sectionId, rowId) => {
@@ -27,34 +41,32 @@ class IndexPage extends React.Component {
       component: DetailPage,
       props: {
         data: data.data,
-        refreshList: this.refreshList,
+        addressStore: this.props.addressStore,
       }
-    });
-  };
-
-  refreshList = (callback) => {
-    Address.getList().then((list) => {
-      this.setState({ dataSource: this.ds.cloneWithRows(list), callback });
     });
   };
 
   onAddConfirm = (id, name, tel) => {
     if (id == null) {
-      Address.add(name, tel).then(() => {
-        this.refreshList();
-      });
+      this.props.addressStore.addAddress(name, tel);
     }
   };
 
   render() {
+    const addressList = Array.prototype.slice.call(this.props.addressStore.data);
     return (
       <View style={styles.container}>
         <View style={styles.appBar}>
           <Text style={styles.appBarText}>通讯录</Text>
         </View>
         <ListView
+          renderHeader={() => (this.props.addressStore.loading &&
+            <View style={styles.indicator}>
+              <ActivityIndicator />
+            </View>
+          )}
           style={styles.list}
-          dataSource={this.state.dataSource}
+          dataSource={this.ds.cloneWithRows(addressList)}
           enableEmptySections
           renderRow={(data, sectionId, rowId) =>
             <ListItem data={data} sectionId={sectionId} rowId={rowId} onClick={this.onItemClick} />
@@ -105,8 +117,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     borderTopWidth: 0.5,
     borderColor: '#e5e5e5',
+  },
+  indicator: {
+    padding: 10,
   }
 });
 
-export default IndexPage;
+
+const _IndexPage = function _IndexPage(props) {
+  return <IndexPage {...props} addressStore={AddressStore} />;
+};
+
+export default _IndexPage;
 

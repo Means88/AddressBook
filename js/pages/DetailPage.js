@@ -26,11 +26,13 @@ class DetailPage extends React.Component {
     this.setState({
       data: address,
     });
-    address.save().then(this.props.refreshList);
+    if (id) {
+      this.props.addressStore.modifyAddress(id, name, tel);
+    }
   };
 
   removeAddress = () => {
-    this.state.data.remove().then(this.props.refreshList);
+    this.props.addressStore.removeAddress(this.props.data.id);
     this.navigateBack();
   };
 

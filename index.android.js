@@ -14,3 +14,5 @@ import {
 import App from './js/App';
 
 AppRegistry.registerComponent('AddressBook', () => App);
+
+export default App;
