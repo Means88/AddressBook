@@ -7,7 +7,7 @@ try {
   console.error(e);
 }
 
-export const bmob = axios.create({
+const bmobApi = axios.create({
   baseURL: 'https://api.bmob.cn/1/classes/',
   headers: {
     'X-Bmob-Application-Id': settings.APP_ID,
@@ -16,3 +16,46 @@ export const bmob = axios.create({
   }
 });
 
+
+const bmobMock = {
+  get: async() => {
+    return {
+      data: {
+        results: [{
+          objectId: 'testid',
+          name: 'test name',
+          tel: '123',
+        }],
+      }
+    };
+  },
+
+  post: async() => {
+    return {
+      data: { objectId: 'addid' },
+    };
+  },
+
+  delete: async() => {
+    return { data: {} };
+  },
+
+  put: async() => {
+    return {
+      data: {
+        objectId: 'testid',
+        name: 'test put',
+        tel: '123',
+      }
+    };
+  },
+};
+
+let _bmob = null;
+if (typeof process !== 'undefined' && typeof process.env !== 'undefined' && process.env.NODE_ENV === 'test') {
+  _bmob = bmobMock;
+} else {
+  _bmob = bmobApi;
+}
+
+export const bmob = _bmob;

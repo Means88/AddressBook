@@ -31,7 +31,7 @@ class EditModal extends React.Component {
       <Modal {...others}>
         <View style={styles.container}>
           <View style={styles.appBar}>
-            <Text style={styles.appBarText}>添加</Text>
+            <Text style={styles.appBarText}>编辑</Text>
           </View>
           <View style={styles.formComponent}>
             <TextInput
@@ -92,6 +92,7 @@ EditModal.defaultProps = {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
+    backgroundColor: 'white',
   },
   appBar: {
     height: 60,
